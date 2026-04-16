@@ -2,7 +2,7 @@
 
 import { useSearchParams, useRouter } from "next/navigation";
 import { Edit3, Maximize, Minimize, Moon, Sun } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useState, type CSSProperties } from "react";
 import { Button } from "@/components/ui/button";
 
 type FullscreenDocument = Document & {
@@ -18,6 +18,29 @@ function getFullscreenElement(doc: FullscreenDocument) {
   return doc.fullscreenElement ?? doc.webkitFullscreenElement ?? null;
 }
 
+type AnimationMode = "scroll" | "blink";
+type FontSizeMode = "small" | "medium" | "large" | "extra-large" | "2xl";
+
+const animationStyles: Record<AnimationMode, CSSProperties> = {
+  scroll: {
+    position: "absolute",
+    left: "100%",
+    animation: "marquee 8s linear infinite",
+    willChange: "transform",
+  },
+  blink: {
+    animation: "blink 1.1s steps(2, start) infinite",
+  },
+};
+
+const fontSizeClasses: Record<FontSizeMode, string> = {
+  small: "text-[60vh] md:text-[60vh]",
+  medium: "text-[70vh] md:text-[70vh]",
+  large: "text-[80vh] md:text-[80vh]",
+  "extra-large": "text-[90vh] md:text-[90vh]",
+  "2xl": "text-[100vh] md:text-[100vh]",
+};
+
 export default function DisplayPage() {
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -29,7 +52,15 @@ export default function DisplayPage() {
   // ดึงค่าจาก URL (ถ้าไม่มีให้ใช้ Default)
   const text = searchParams.get("text") || "HELLO, WORLD";
   const color = searchParams.get("color") || "#ff0000";
-  const animation = searchParams.get("animation") || "scroll";
+  const animation = (searchParams.get("animation") === "blink" ? "blink" : "scroll") as AnimationMode;
+  const fontSize = ((value) =>
+    value === "small" ||
+    value === "medium" ||
+    value === "large" ||
+    value === "extra-large" ||
+    value === "2xl"
+      ? value
+      : "large")(searchParams.get("size")) as FontSizeMode;
 
   useEffect(() => {
     const doc = document as FullscreenDocument;
@@ -169,7 +200,7 @@ export default function DisplayPage() {
           size="default"
           onClick={() =>
             router.push(
-              `/edit?text=${text}&color=${encodeURIComponent(color)}&animation=${animation}`
+              `/edit?text=${text}&color=${encodeURIComponent(color)}&animation=${animation}&size=${fontSize}`
             )
           }
           className={`h-10 w-10 rounded-full p-0 backdrop-blur ${
@@ -185,14 +216,13 @@ export default function DisplayPage() {
       {/* Display Text */}
       <div className="relative flex w-full items-center justify-center">
         <h1
+          key={`${animation}-${fontSize}-${text}`}
           style={{
             color,
             textShadow: `0 0 15px ${color}, 0 0 30px ${color}, 0 0 50px ${color}`,
-            ...(animation === "scroll"
-              ? { position: "absolute", left: "100%", animation: "marquee 8s linear infinite" }
-              : { animation: "blink 1.1s steps(2, start) infinite" }),
+            ...animationStyles[animation],
           }}
-          className="whitespace-nowrap text-[80vh] font-bold uppercase tracking-[0.2em] md:text-[80vh]"
+          className={`whitespace-nowrap font-bold uppercase tracking-[0.2em] ${fontSizeClasses[fontSize]}`}
         >
           {text}
         </h1>
