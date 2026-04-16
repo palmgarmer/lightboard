@@ -2,7 +2,7 @@
 
 import { useSearchParams, useRouter } from "next/navigation";
 import { Edit3, Maximize, Minimize, Moon, Sun } from "lucide-react";
-import { useEffect, useState, type CSSProperties } from "react";
+import { Suspense, useEffect, useState, type CSSProperties } from "react";
 import { Button } from "@/components/ui/button";
 
 type FullscreenDocument = Document & {
@@ -41,7 +41,7 @@ const fontSizeClasses: Record<FontSizeMode, string> = {
   "2xl": "text-[100vh] md:text-[100vh]",
 };
 
-export default function DisplayPage() {
+function DisplayPageContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -228,5 +228,13 @@ export default function DisplayPage() {
         </h1>
       </div>
     </main>
+  );
+}
+
+export default function DisplayPage() {
+  return (
+    <Suspense fallback={<main className="min-h-dvh bg-black" />}>
+      <DisplayPageContent />
+    </Suspense>
   );
 }

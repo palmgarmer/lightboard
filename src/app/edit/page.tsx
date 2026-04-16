@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type CSSProperties } from "react";
+import { Suspense, useState, type CSSProperties } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Type, Palette, MoveHorizontal, Play } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
@@ -29,7 +29,7 @@ const fontSizeClasses: Record<FontSizeMode, string> = {
   "2xl": "text-[100vh] md:text-[100vh]",
 };
 
-export default function EditPage() {
+function EditPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -109,5 +109,13 @@ export default function EditPage() {
         </CardContent>
       </Card>
     </section>
+  );
+}
+
+export default function EditPage() {
+  return (
+    <Suspense fallback={<section className="min-h-dvh bg-background" />}>
+      <EditPageContent />
+    </Suspense>
   );
 }
